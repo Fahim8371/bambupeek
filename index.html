@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BambuPeek</title><script type="module" src="/src/main.ts"></script></head>
+<body>
+<div id="app">
+  <main id="stage">
+    <video id="camera" autoplay muted playsinline disablepictureinpicture></video>
+    <div class="camera-badge" id="camera-badge"><span class="dot"></span><span id="camera-state">Offline</span></div>
+    <span id="resolution" class="resolution" hidden></span>
+    <div id="empty" class="empty">
+      <svg class="printer-art" viewBox="0 0 200 170" aria-hidden="true"><path d="m46 26 82-12 40 25v103l-84 15-38-23V26Zm0 0 38 23 84-10M84 49v108M57 40v85l17 10V50M95 59l60-10v82l-60 11V59Z"/><path class="accent-stroke" d="m113 83 25-4 10 7v24l-24 5-11-7V83Zm0 0 11 8 24-5M124 91v24M129 55v13"/></svg>
+      <h1 id="empty-title">Your printer. In view.</h1>
+      <p id="empty-copy">A quiet place to keep an eye on what’s taking shape.</p>
+      <button id="open-setup" class="primary">Connect a printer <span>↗</span></button>
+      <button id="retry" class="primary" hidden>Try again <span>↻</span></button>
+      <span class="privacy-note"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Direct connection. No cloud account.</span>
+    </div>
+    <div id="loading" class="loading" hidden><span class="spinner"></span><span>Connecting to your printer…</span><button id="cancel-connect" class="text-button">Cancel</button></div>
+  <footer class="stats" aria-label="Printer status">
+    <div class="print-summary"><span class="status-symbol" id="status-symbol" aria-hidden="true">○</span><div><strong id="print-state">Ready when you are</strong><span id="print-detail">Connect your camera to get started</span></div><div class="progress-summary"><strong id="progress-number">—</strong><span id="remaining">Time remaining</span></div></div>
+    <div class="measurements"><span>Layer <strong id="layer">— / —</strong></span><span>Nozzle <strong id="nozzle">— °C</strong></span><span>Bed <strong id="bed">— °C</strong></span><span id="status-note" class="status-note">Awaiting connection</span></div>
+  </footer>
+    <div class="floating-controls" aria-label="Window controls">
+      <button id="move-window" class="tool icon-only" aria-label="Drag window" title="Drag to move"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18m-12-6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3m15-6 3 3-3 3"/></svg></button>
+      <button id="pin" class="tool icon-only" aria-label="Stay on top" aria-pressed="false" title="Stay on top"><svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6 3 3v2H6v-2l3-3-1-6ZM12 14v7"/></svg></button>
+      <div class="size-control"><button id="size-toggle" class="tool icon-only" aria-label="Window size" aria-expanded="false" aria-controls="size-options" title="Window size"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 15h8M8 15v-5m8 5v-5"/></svg></button>
+        <div id="size-options" class="size-options" role="group" aria-label="Window size presets" hidden><button type="button" data-size="small" aria-pressed="false">Small <span>480 × 270</span></button><button type="button" data-size="medium" aria-pressed="false">Medium <span>800 × 450</span></button><button type="button" data-size="large" aria-pressed="false">Large <span>1120 × 630</span></button></div>
+      </div>
+      <button id="settings" class="tool icon-only" aria-label="Printer settings" title="Printer settings"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg></button>
+      <button id="minimize-window" class="tool icon-only" aria-label="Minimize window" title="Minimize"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+      <button id="close-window" class="tool icon-only" aria-label="Close window" title="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+    </div>
+  </main>
+</div>
+<dialog id="setup-dialog">
+  <form id="setup-form">
+    <div class="dialog-top"><span class="eyebrow">PRINTER CONNECTION</span><button type="button" id="close-setup" class="tool icon-only" aria-label="Close settings">✕</button></div>
+    <h2>Bring your printer closer.</h2><p class="dialog-copy">Use the details on your printer’s network settings screen.</p>
+    <section id="saved-profile" class="saved-profile" hidden aria-label="Saved printer"><div><strong>Saved on this device</strong><span id="saved-address"></span></div><div class="saved-actions"><button type="button" id="connect-saved" class="text-button">Connect saved printer</button><button type="button" id="forget-printer" class="text-button">Forget</button></div></section>
+    <button type="button" id="save-current" class="discover-button" hidden>Save the connected printer on this device</button>
+    <button type="button" id="discover" class="discover-button"><span>⌁</span> Find printers on this network</button>
+    <div id="discovery-results" aria-live="polite"></div>
+    <div class="or"><span>or connect manually</span></div>
+    <div class="fields"><label>Printer IP address<input id="ip" placeholder="e.g. 192.168.1.100" inputmode="decimal" autocomplete="off" required></label><label>LAN access code<input id="access-code" type="password" placeholder="8 characters" autocomplete="off" maxlength="8" required></label></div>
+    <details><summary>Print status <span>Optional</span></summary><label>Printer serial number<input id="serial" placeholder="From the printer’s Device info screen" autocomplete="off" maxlength="32"></label><p>Used to read progress and temperatures. Discovery fills this in for you.</p></details>
+    <p class="setup-tip">For P2S: enable <strong>LAN Only Liveview</strong> in the printer’s LAN settings. You can keep cloud printing enabled.</p>
+    <label class="remember"><input id="remember-printer" type="checkbox" checked><span>Save this printer on this device<br><small>Reconnect automatically next time. Replaces the saved printer.</small></span></label>
+    <p id="form-error" class="form-error" role="alert" hidden></p>
+    <button id="submit" class="primary wide" type="submit">Open live view <span>↗</span></button>
+    <p class="session-note">Saved printer details are protected by macOS Keychain or Windows Credential Manager. Uncheck to connect for this session only. Nothing is uploaded.</p>
+  </form>
+</dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>

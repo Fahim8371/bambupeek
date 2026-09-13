@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible BambuPeek issue
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include printer IPs, access codes, serial numbers, raw logs, or identifying camera footage. For security issues use private vulnerability reporting."
+  - type: input
+    id: environment
+    attributes:
+      label: App version, OS version, and architecture
+      placeholder: "0.1.0, macOS version, Apple Silicon"
+    validations:
+      required: true
+  - type: input
+    id: printer
+    attributes:
+      label: Printer model and firmware version
+      description: "Model only — no serial number or network details."
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps, expected result, and actual result
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: "I removed access codes, network addresses, serial numbers, and identifying images."
+          required: true

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="BambuPeek illustrated preview with sample print status">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#1c2923"/><stop offset="1" stop-color="#090e0c"/></linearGradient><linearGradient id="bed" x2="0" y2="1"><stop stop-color="#34413a"/><stop offset="1" stop-color="#1b2620"/></linearGradient><linearGradient id="object" x2="1" y2="1"><stop stop-color="#baf3a6"/><stop offset="1" stop-color="#68a955"/></linearGradient></defs>
+<rect width="1280" height="720" rx="22" fill="url(#bg)"/>
+<g fill="none" stroke="#607065" stroke-width="2" opacity=".5"><path d="M190 82 948 45 1102 134v464L357 681 190 559V82Zm0 0 167 85 745-33M357 167v514M214 111v431l119 89M387 188l685-35v425l-685 78Z"/><path d="m219 252 835-54M233 273l821-53" stroke-width="11"/></g>
+<path d="m248 497 643-54 166 115-677 83Z" fill="url(#bed)" stroke="#697c6c"/>
+<g stroke="#71836f" opacity=".25"><path d="m313 490 161 139m-25-150 167 134m-32-145 171 128m-37-139 175 121M280 525l650-61M322 563l656-71M350 595l671-78"/></g>
+<path d="m507 376 255-24 76 48v139l-260 28-71-46Z" fill="url(#object)"/>
+<path d="m507 376 71 47 260-23-76-48Z" fill="#d0fbc2"/>
+<path d="m578 423 260-23v139l-260 28Z" fill="#89c673"/>
+<g stroke="#4d8243" opacity=".3"><path d="m578 438 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25m-260 38 260-25"/></g>
+<path d="m641 234 77-5 28 24v65l-75 8-30-24Z" fill="#202c25" stroke="#708670"/><path d="m670 326 10 25 12-27" fill="#afcba4"/>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fill="#fff"><text x="42" y="61" font-size="15" letter-spacing="3" fill="#a5baac">BAMBUPEEK</text><text x="42" y="82" font-size="10" fill="#819b87">ILLUSTRATED PREVIEW · SAMPLE VALUES</text>
+<g stroke="#e2efdf" fill="#152019" fill-opacity=".5"><rect x="1050" y="24" width="40" height="40" rx="11"/><rect x="1100" y="24" width="40" height="40" rx="11"/><rect x="1150" y="24" width="40" height="40" rx="11"/><rect x="1200" y="24" width="40" height="40" rx="11"/></g>
+<g fill="none" stroke="#d5f6c7" stroke-width="2"><path d="M1066 33h8l-1 8 4 4h-14l4-4-1-8Zm4 12v10"/><rect x="1109" y="34" width="22" height="18" rx="2"/><path d="M1159 39h22m-22 10h22m-16-15v10m10 0v10m30-17 12 14m-12 0 12-14"/></g>
+<text x="42" y="640" font-size="24" font-weight="600">◔  Printing</text><text x="1240" y="640" text-anchor="end" font-size="24" font-weight="600">64%   <tspan font-size="19" font-weight="400">42m remaining</tspan></text>
+<text x="42" y="674" font-size="18">Layer  128 / 200<tspan dx="38">Nozzle  220 °C</tspan><tspan dx="38">Bed  60 °C</tspan></text></g></svg>
