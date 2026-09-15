@@ -18,6 +18,17 @@ pub struct Connection {
     pub serial: String,
 }
 impl Connection {
+    fn with_previous(mut self, previous: Option<&Self>) -> Result<Self, String> {
+        if let Some(previous) = previous.filter(|old| old.ip == self.ip.trim()) {
+            if self.access_code.trim().is_empty() {
+                self.access_code = previous.access_code.clone();
+            }
+            if self.serial.trim().is_empty() {
+                self.serial = previous.serial.clone();
+            }
+        }
+        self.validate()
+    }
     fn validate(mut self) -> Result<Self, String> {
         self.ip = self.ip.trim().to_string();
         self.access_code = self.access_code.trim().to_string();
@@ -46,6 +57,7 @@ impl Connection {
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub enum StreamEvent {
     Format { codec: String },
+    Printer { ip: String, serial: String },
     Error { code: String },
     Status { values: status::PrintStatus },
     StatusUnavailable { reason: String },
@@ -71,6 +83,7 @@ struct AppState {
 
 #[tauri::command]
 async fn connect(
+    app: tauri::AppHandle,
     config: Option<Connection>,
     session_id: u32,
     events: Channel<StreamEvent>,
@@ -80,7 +93,7 @@ async fn connect(
     let config = {
         let mut saved = state.config.lock().map_err(|_| "internal-error")?;
         if let Some(config) = config {
-            *saved = Some(config.validate()?);
+            *saved = Some(config.with_previous(saved.as_ref())?);
         }
         saved.clone().ok_or("invalid-code")?
     };
@@ -99,6 +112,26 @@ async fn connect(
                 if let Some(printer) = printers.into_iter().find(|printer| printer.ip == config.ip)
                 {
                     config.serial = printer.serial;
+                    // Keep discovery results in the same session that owns them,
+                    // so a later save includes the serial number required by MQTT.
+                    let state = app.state::<AppState>();
+                    if let Ok(mut session) = state.session.lock() {
+                        if let Some(session) = session.as_mut().filter(|s| s.id == session_id) {
+                            session.config.serial = config.serial.clone();
+                        }
+                    }
+                    if let Ok(mut active) = state.config.lock() {
+                        if let Some(active) = active
+                            .as_mut()
+                            .filter(|c| c.ip == config.ip && c.access_code == config.access_code)
+                        {
+                            active.serial = config.serial.clone();
+                        }
+                    }
+                    let _ = status_events.send(StreamEvent::Printer {
+                        ip: config.ip.clone(),
+                        serial: config.serial.clone(),
+                    });
                 }
             }
         }
@@ -232,6 +265,27 @@ mod tests {
             access_code: code.into(),
             serial: String::new(),
         }
+    }
+    #[test]
+    fn status_edits_reuse_credentials_only_for_the_same_printer() {
+        let mut previous = config("192.168.1.2", "TEST1234");
+        previous.serial = "DEMO1234".into();
+        let mut update = config("192.168.1.2", "");
+        update.serial = "NEW12345".into();
+        let result = update.with_previous(Some(&previous)).unwrap();
+        assert_eq!(result.access_code, "TEST1234");
+        assert_eq!(result.serial, "NEW12345");
+        assert_eq!(
+            config("192.168.1.2", "")
+                .with_previous(Some(&previous))
+                .unwrap()
+                .serial,
+            "DEMO1234"
+        );
+        assert!(config("192.168.1.100", "")
+            .with_previous(Some(&previous))
+            .is_err());
+        assert!(config("192.168.1.2", "").with_previous(None).is_err());
     }
     #[test]
     fn connection_rejects_injection_and_remote_hosts() {

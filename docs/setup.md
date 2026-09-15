@@ -41,3 +41,7 @@ If you tried an earlier development build that used Keychain, its old entry may 
 Choose the size icon above the picture and select Small, Medium, or Large. These are logical window dimensions at a 16:9 ratio. The last preset is applied on the next launch. The Stay on top preference is also remembered. Both preferences are local to the device’s app webview.
 
 Small windows keep the status compact. Settings scroll when the window cannot fit the full form. Status always sits over the video picture, including when the stream is letterboxed.
+
+## Restore missing print status
+
+Open settings using the floating settings icon or **Command-comma** on Mac (**Control-comma** on Windows). Enter the printer serial number under Print status, leave the access code blank to keep the code for the currently connected IP, and open the live view. Keep Save selected to remember the complete profile. Auto-discovered serial numbers are also retained in the active session and saved profile.

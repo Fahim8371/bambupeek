@@ -9,7 +9,7 @@ const dialog = $<HTMLDialogElement>('setup-dialog');
 interface Config { ip: string; accessCode: string; serial: string }
 interface Printer { ip: string; serial: string; model: string }
 interface PrintStatus { state: string | null; progress: number | null; layer: number | null; totalLayers: number | null; remainingMinutes: number | null; nozzle: number | null; bed: number | null }
-type StreamEvent = { type: 'format'; codec: string } | { type: 'error'; code: string } | { type: 'status'; values: PrintStatus } | { type: 'status-unavailable'; reason: string };
+type StreamEvent = { type: 'format'; codec: string } | { type: 'printer'; ip: string; serial: string } | { type: 'error'; code: string } | { type: 'status'; values: PrintStatus } | { type: 'status-unavailable'; reason: string };
 
 const errors: Record<string, string> = {
   'store-unavailable': 'The local printer settings could not be opened. You can still connect for this session.',
@@ -48,6 +48,9 @@ let toastTimer = 0;
 let saved: Pick<Config, 'ip' | 'serial'> | null = null;
 let storeBusy = false;
 let unreadableSaved = false;
+let activeIp = '';
+let rememberSession = false;
+let pendingSave: number | undefined;
 function updateSavedUI() {
   $('saved-profile').hidden = !saved && !unreadableSaved;
   $('saved-address').textContent = saved?.ip ?? 'Saved profile unavailable';
@@ -58,20 +61,24 @@ function updateSavedUI() {
   $<HTMLButtonElement>('submit').disabled = storeBusy;
 }
 async function saveCurrent(sessionId = generation) {
-  if (storeBusy) return;
+  if (storeBusy) { pendingSave = sessionId; return; }
   storeBusy = true; updateSavedUI();
   try {
     saved = await invoke<Pick<Config, 'ip' | 'serial'>>('save_printer', { sessionId });
     unreadableSaved = false; toast('Printer saved on this device. It will reconnect next time.');
   } catch (error) { toast(describe(error)); }
-  finally { storeBusy = false; updateSavedUI(); }
+  finally {
+    storeBusy = false; updateSavedUI();
+    const next = pendingSave; pendingSave = undefined;
+    if (next === generation) void saveCurrent(next);
+  }
 }
-$('save-current').addEventListener('click', () => void saveCurrent());
+$('save-current').addEventListener('click', () => { rememberSession = true; void saveCurrent(); });
 $('forget-printer').addEventListener('click', async () => {
   if (storeBusy) return;
   storeBusy = true; updateSavedUI();
   try {
-    await invoke('forget_printer'); saved = null; unreadableSaved = false;
+    await invoke('forget_printer'); saved = null; unreadableSaved = false; rememberSession = false; pendingSave = undefined;
     $<HTMLInputElement>('remember-printer').checked = false;
     toast('Saved printer removed. The current session can stay connected.');
   } catch (error) { toast(describe(error)); }
@@ -82,7 +89,7 @@ $('connect-saved').addEventListener('click', async () => {
   storeBusy = true; updateSavedUI();
   try {
     saved = await invoke<Pick<Config, 'ip' | 'serial'> | null>('saved_printer');
-    if (saved) { statusConfigured = Boolean(saved.serial); dialog.close(); await start(null); }
+    if (saved) { activeIp = saved.ip; rememberSession = true; statusConfigured = Boolean(saved.serial); dialog.close(); await start(null); }
   } catch (error) { toast(describe(error)); }
   finally { storeBusy = false; updateSavedUI(); }
 });
@@ -147,7 +154,7 @@ async function start(config: Config | null, remember = false) {
   if (connecting) return;
   await stop(); resetStats();
   connecting = true;
-  if (config) statusConfigured = Boolean(config.serial);
+  if (config) { statusConfigured = Boolean(config.serial); activeIp = config.ip; rememberSession = remember; }
   const token = ++generation;
   $('empty').hidden = true; $('loading').hidden = false; cameraState('Connecting');
   const media = new MediaSource();
@@ -208,7 +215,7 @@ async function start(config: Config | null, remember = false) {
       $('loading').hidden = true; cameraState('Live', true); $('resolution').hidden = false;
       if (!statsReceived) statusUnavailable();
       updateSavedUI();
-      if (remember) void saveCurrent(token);
+      if (rememberSession) void saveCurrent(token);
     }
     frameHandle = video.requestVideoFrameCallback(onFrame);
   };
@@ -230,6 +237,12 @@ async function start(config: Config | null, remember = false) {
     if (event.type === 'format') { codec = event.codec; initialize(); }
     else if (event.type === 'error') failed(event.code, token);
     else if (event.type === 'status') renderStatus(event.values);
+    else if (event.type === 'printer') {
+      if (activeIp === event.ip) {
+        $<HTMLInputElement>('serial').value = event.serial; statusConfigured = true;
+        if (rememberSession && live) void saveCurrent(token);
+      }
+    }
     else statusUnavailable(event.reason);
   };
   const data = new Channel<ArrayBuffer>();
@@ -250,12 +263,13 @@ $('setup-form').addEventListener('submit', event => {
   event.preventDefault();
   const config: Config = { ip: $<HTMLInputElement>('ip').value.trim(), accessCode: $<HTMLInputElement>('access-code').value.trim(), serial: $<HTMLInputElement>('serial').value.trim() };
   $('form-error').hidden = true;
-  if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(config.ip) || !/^[a-z0-9]{8}$/i.test(config.accessCode)) {
+  if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(config.ip) || (!/^[a-z0-9]{8}$/i.test(config.accessCode) && !(hasConnection && activeIp === config.ip && !config.accessCode))) {
     $('form-error').textContent = 'Enter the printer IP address and its 8-character access code.'; $('form-error').hidden = false; return;
   }
   dialog.close(); void start(config, $<HTMLInputElement>('remember-printer').checked);
 });
-const openSetup = () => { $('form-error').hidden = true; updateSavedUI(); dialog.showModal(); };
+const openSetup = () => { $('form-error').hidden = true; updateSavedUI(); $<HTMLInputElement>('access-code').placeholder = hasConnection ? 'Blank keeps current code' : '8 characters'; dialog.showModal(); };
+window.addEventListener('keydown', event => { if ((event.metaKey || event.ctrlKey) && event.key === ',') { event.preventDefault(); if (!dialog.open) openSetup(); } });
 $('settings').addEventListener('click', openSetup); $('open-setup').addEventListener('click', openSetup);
 $('close-setup').addEventListener('click', () => dialog.close());
 $('retry').addEventListener('click', () => void start(null));
@@ -358,7 +372,7 @@ async function init() {
       saved = await invoke<Pick<Config, 'ip' | 'serial'> | null>('saved_printer');
       if (saved) {
         $<HTMLInputElement>('ip').value = saved.ip; $<HTMLInputElement>('serial').value = saved.serial;
-        statusConfigured = Boolean(saved.serial); hasConnection = true;
+        activeIp = saved.ip; rememberSession = true; statusConfigured = Boolean(saved.serial); hasConnection = true;
         if (env.ffmpeg) await start(null);
       }
     } catch (error) { unreadableSaved = true; toast(describe(error)); }

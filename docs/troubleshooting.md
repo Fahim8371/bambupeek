@@ -16,7 +16,7 @@ Enable LAN Only Liveview on the P2S and recheck the eight-character LAN access c
 
 ## Video works but status is unavailable
 
-Open settings and add the correct serial number under **Print status**, or use discovery to fill it. Connect again with the access code and save if wanted. The camera does not require a serial number, but the MQTT status topic does.
+Open settings and add the correct serial number under **Print status**, or use discovery to fill it. For the currently connected IP, leave the access code blank to reuse it. Connect again with Save selected to retain the serial number. Open settings with Command-comma on Mac if the controls are hidden. The camera does not require a serial number, but the MQTT status topic does.
 
 Status also needs port 8883 and the printer’s firmware to allow local MQTT access. The app retries interrupted status connections. A “Last received values” label means the numbers are stale, not current. Wrong serial numbers can produce a connection with no matching status reports.
 

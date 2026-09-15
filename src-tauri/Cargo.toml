@@ -1,6 +1,6 @@
 [package]
 name = "bambupeek"
-version = "0.1.0"
+version = "0.1.1"
 description = "A private desktop window onto your 3D printer"
 edition = "2021"
 license = "MIT"

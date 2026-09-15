@@ -31,7 +31,7 @@ BambuPeek keeps the camera in view while you work. There is no title bar or dash
 
 ## Status and compatibility
 
-**Early preview, version 0.1.0.** Camera and status have been tested with a Bambu Lab P2S on an Apple Silicon Mac. This is an independent community project, not affiliated with or endorsed by Bambu Lab.
+**Early preview, version 0.1.1.** Camera and status have been tested with a Bambu Lab P2S on an Apple Silicon Mac. This is an independent community project, not affiliated with or endorsed by Bambu Lab.
 
 | Platform / printer | Current status |
 | --- | --- |
@@ -64,7 +64,7 @@ brew upgrade --cask bambupeek
 
 ### Download the app
 
-Get **BambuPeek-0.1.0-macos-arm64.zip** from [GitHub Releases](https://github.com/Fahim8371/bambupeek/releases). Unzip it, move BambuPeek to Applications, and install the video engine:
+Get **BambuPeek-0.1.1-macos-arm64.zip** from [GitHub Releases](https://github.com/Fahim8371/bambupeek/releases). Unzip it, move BambuPeek to Applications, and install the video engine:
 
 ```sh
 brew install ffmpeg
@@ -106,7 +106,7 @@ Move the pointer over the video to reveal the controls at the top right. They fa
 | Move | Drag the handle, or drag anywhere on the video |
 | Pin | Toggle Stay on top; Escape turns it off |
 | Size | Choose Small, Medium, or Large |
-| Settings | Connect, save the current printer, reconnect a saved printer, or forget it |
+| Settings (⌘, on Mac) | Connect, save the current printer, reconnect a saved printer, or forget it |
 | Minimize / Close | Standard window actions |
 
 The status overlay has no panel or background. If status disconnects after receiving data, values are marked as the last received values while the connection retries. Camera interruptions show a retry screen rather than presenting a frozen image as live.
