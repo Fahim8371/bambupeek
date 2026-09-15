@@ -16,4 +16,4 @@ The initial distribution is a macOS Apple Silicon preview with external FFmpeg. 
 7. Create a Git tag and GitHub prerelease, attach the archive and checksum file, and include installation requirements and limitations. Download and compare the hosted artifact before announcing it.
 8. Update `Fahim8371/homebrew-bambupeek` with the exact release URL, version and SHA-256. Keep the FFmpeg dependency and architecture restriction. Validate the cask with Homebrew and test installation into an isolated app directory.
 
-A future signed release will need an Apple Developer identity, notarization credentials stored as CI secrets, and an update/keychain migration check. Do not put signing certificates or credentials in Git. Additional architectures and operating systems need their own builds and hardware validation.
+A future signed release will need an Apple Developer identity, notarization credentials stored as CI secrets, and an update and saved-profile migration check. Do not put signing certificates or credentials in Git. Additional architectures and operating systems need their own builds and hardware validation.

@@ -18,14 +18,11 @@ The computer must be able to reach the printer directly. Guest Wi-Fi, wireless c
 
 ## Save and reconnect
 
-BambuPeek saves **one printer profile per OS user**. The IP, access code, and optional serial number are kept together in the OS credential store:
+BambuPeek saves **one printer profile per OS user**. The IP, access code, and optional serial number are stored in the app’s local configuration folder as `printer.json`. On macOS: `~/Library/Application Support/app.bambupeek.desktop/printer.json`. Experimental Windows builds use the current user’s app configuration directory instead.
 
-- macOS: login Keychain; service `app.bambupeek.desktop`, account `saved-printer`.
-- Windows source builds: Windows Credential Manager using the same service/account identifiers; not yet validated on Windows hardware.
+The Save checkbox is selected initially. A successful first camera frame triggers saving. Changing printers and saving replaces the previous profile. If saving fails, the app says so and keeps the current connection running. Writes replace the file atomically so an incomplete write does not erase the previous profile.
 
-The Save checkbox is selected initially. A successful first camera frame triggers saving. Changing printers and saving replaces the previous profile. If saving fails, the app says so and keeps the current connection running; it does not fall back to plaintext storage.
-
-On the next launch, BambuPeek loads the saved profile internally and tries to reconnect. No access code is returned to the web interface. The operating system may ask for credential access, particularly after rebuilding or replacing an app that lacks a stable Developer ID signature.
+On the next launch, BambuPeek loads the saved profile internally and tries to reconnect. No access code is returned to the web interface. There is no Keychain or credential-store access and no password prompt. The local file is unencrypted; on macOS it is readable/writable only by the current OS user (0600), inside an owner-only directory (0700). Software running as that same user and administrators may still read it.
 
 If you originally connected without saving, open settings and choose **Save the connected printer on this device**. Use **Connect saved printer** to switch back to the saved connection without typing its code.
 
@@ -35,7 +32,9 @@ Unchecking Save affects the new connection only. It does not remove a previously
 
 Choose **Settings → Forget**. The stored profile is deleted, while any active connection may continue until you quit or connect elsewhere. On the next launch, BambuPeek will ask for printer details.
 
-Forget the profile before uninstalling if you want to remove it. If you already uninstalled on macOS, use Keychain Access to locate service `app.bambupeek.desktop`, account `saved-printer`, and delete that specific item. OS backups are managed by the OS and are not erased by this action.
+Forget the profile before uninstalling if you want to remove it. If you already uninstalled on macOS, delete the specific `printer.json` file in the app’s configuration folder. OS backups are managed by the OS and are not erased by this action.
+
+If you tried an earlier development build that used Keychain, its old entry may remain there. This version never reads it or triggers its password prompt. You can optionally remove the old `app.bambupeek.desktop` / `saved-printer` item using Keychain Access. Enter and save your printer once in the new local-file version.
 
 ## Size and pin preferences
 

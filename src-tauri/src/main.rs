@@ -6,6 +6,7 @@ mod storage;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use tauri::ipc::{Channel, Response};
+use tauri::Manager;
 use tokio::sync::Semaphore;
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -147,11 +148,16 @@ fn environment() -> serde_json::Value {
 
 #[tauri::command]
 async fn saved_printer(
+    app: tauri::AppHandle,
     state: tauri::State<'_, AppState>,
 ) -> Result<Option<storage::SavedPrinter>, String> {
-    let connection = tokio::task::spawn_blocking(storage::load)
+    let directory = app
+        .path()
+        .app_config_dir()
+        .map_err(|_| "store-unavailable")?;
+    let connection = tokio::task::spawn_blocking(move || storage::load(&directory))
         .await
-        .map_err(|_| "secure-store-unavailable")??;
+        .map_err(|_| "store-unavailable")??;
     let info = connection.as_ref().map(storage::SavedPrinter::from);
     if let Some(connection) = connection {
         *state.config.lock().map_err(|_| "internal-error")? = Some(connection);
@@ -160,6 +166,7 @@ async fn saved_printer(
 }
 #[tauri::command]
 async fn save_printer(
+    app: tauri::AppHandle,
     session_id: u32,
     state: tauri::State<'_, AppState>,
 ) -> Result<storage::SavedPrinter, String> {
@@ -171,13 +178,21 @@ async fn save_printer(
         .filter(|session| session.id == session_id)
         .map(|session| session.config.clone())
         .ok_or("session-ended")?;
-    tokio::task::spawn_blocking(move || storage::save(config))
+    let directory = app
+        .path()
+        .app_config_dir()
+        .map_err(|_| "store-unavailable")?;
+    tokio::task::spawn_blocking(move || storage::save(&directory, config))
         .await
         .map_err(|_| "save-failed")?
 }
 #[tauri::command]
-async fn forget_printer() -> Result<(), String> {
-    tokio::task::spawn_blocking(storage::forget)
+async fn forget_printer(app: tauri::AppHandle) -> Result<(), String> {
+    let directory = app
+        .path()
+        .app_config_dir()
+        .map_err(|_| "store-unavailable")?;
+    tokio::task::spawn_blocking(move || storage::forget(&directory))
         .await
         .map_err(|_| "forget-failed")?
 }

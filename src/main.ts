@@ -12,9 +12,9 @@ interface PrintStatus { state: string | null; progress: number | null; layer: nu
 type StreamEvent = { type: 'format'; codec: string } | { type: 'error'; code: string } | { type: 'status'; values: PrintStatus } | { type: 'status-unavailable'; reason: string };
 
 const errors: Record<string, string> = {
-  'secure-store-unavailable': 'The device’s secure credential store could not be opened. You can still connect for this session.',
-  'save-failed': 'The printer could not be saved securely. Your current connection is still available; try saving again in settings.',
-  'forget-failed': 'The saved printer could not be removed. Check access to the device’s credential store and try again.',
+  'store-unavailable': 'The local printer settings could not be opened. You can still connect for this session.',
+  'save-failed': 'The printer could not be saved on this device. Your current connection is still available; try saving again in settings.',
+  'forget-failed': 'The saved printer could not be removed. Check access to the local settings folder and try again.',
   'saved-printer-invalid': 'The saved printer could not be read. Forget it in settings, then save the connection again.',
   'session-ended': 'Connect the printer before saving it.',
   'invalid-address': 'Enter a valid printer IP address, such as 192.168.1.100.',

@@ -6,12 +6,16 @@ BambuPeek has no backend, analytics, crash reporting service, cloud account inte
 
 | Data | Location | Lifetime |
 | --- | --- | --- |
-| Saved IP, access code, optional serial | OS credential store, one profile | Until Forget; OS backups may retain copies |
+| Saved IP, access code, optional serial | Per-user local `printer.json`, one profile | Until Forget; device backups may retain copies |
 | Active connection | Rust process memory; code briefly entered in webview form | Until exit or replacement |
 | Pin and selected size | Local webview storage | Until app website data is cleared |
 | Video frames / status | Bounded memory buffers | Replaced during playback and released on disconnect |
 
-There is no plaintext config fallback, camera capture feature, or export of the saved access code. Credentials necessarily exist in app and FFmpeg memory while connected. This does not protect against a compromised OS, privileged debugger, or malware already able to read process memory or unlock the user’s credential store.
+The saved profile is an **unencrypted local file**. On macOS, the file has owner read/write permissions (0600), and its directory has owner-only permissions (0700). It is stored under `~/Library/Application Support/app.bambupeek.desktop/`, separate from the source checkout and app bundle. Experimental Windows builds use their user app configuration directory and inherited OS access controls; Windows has not been validated.
+
+The app does not use Keychain, ask for the login password, or upload the file. A successful save is an atomic file replacement. Forget removes the current file but is not a secure erasure of filesystem snapshots or backups. There is no camera recording or export of the saved access code through the interface.
+
+Credentials necessarily exist in app and FFmpeg memory while connected. Local storage does not protect against other software running as the same user, an administrator, a compromised OS, or a debugger. Choose session-only mode to avoid saving the connection on disk. Full-disk encryption and OS account protection are managed by the device owner, not BambuPeek.
 
 ## Network traffic
 

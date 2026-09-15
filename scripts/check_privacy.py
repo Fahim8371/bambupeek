@@ -8,7 +8,7 @@ issues = []
 for p in root.rglob('*'):
     if not p.is_file() or any(part in skip for part in p.relative_to(root).parts):
         continue
-    if p.name.startswith('.env') or p.suffix in {'.log', '.pcap', '.pcapng'}:
+    if p.name == 'printer.json' or p.name.startswith('.env') or p.suffix in {'.log', '.pcap', '.pcapng'}:
         issues.append((p, 'private configuration or capture'))
     if p.suffix not in {'.rs', '.ts', '.json', '.md', '.toml', '.html', '.css', '.yml', '.yaml', '.py', '.plist'}:
         continue

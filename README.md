@@ -25,7 +25,7 @@ BambuPeek keeps the camera in view while you work. There is no title bar or dash
 - **Print status:** progress, time remaining, layer count, nozzle and bed temperatures.
 - **Stay on top:** pin the window above your other apps; press Escape to unpin.
 - **Three sizes:** Small (480 × 270), Medium (800 × 450), and Large (1120 × 630). The selection is remembered.
-- **Save once:** store one printer in the device’s secure credential store and reconnect on launch.
+- **Save once:** store one printer in a local settings file and reconnect on launch.
 - **Local discovery:** find compatible printers without typing their IP address or serial number.
 - **No BambuPeek account, telemetry, cloud relay, or recording.**
 
@@ -38,7 +38,7 @@ BambuPeek keeps the camera in view while you work. There is no title bar or dash
 | macOS on Apple Silicon | Downloadable preview; live camera and status tested |
 | Intel Mac | Source build only; unverified |
 | Windows | Source is experimental; no installer or hardware validation yet |
-| Linux | Unsupported; secure saving is explicitly unavailable |
+| Linux | Unsupported; no validated build |
 | P2S | Tested with LAN Only Liveview enabled |
 | Other Bambu models | Unverified; printers using the separate JPEG camera protocol are not supported |
 
@@ -113,9 +113,11 @@ The status overlay has no panel or background. If status disconnects after recei
 
 ## Where your details go
 
-The saved printer’s IP, LAN access code, and optional serial number are stored together in **macOS Keychain** (or Windows Credential Manager in experimental source builds). They are not written to a JSON settings file, repository, or release. The app does not sync them to a BambuPeek service. The operating system’s backup and credential policies still apply.
+The saved printer’s IP, LAN access code, and optional serial number are stored together in a **local settings file** on the installing device. On macOS, this is `~/Library/Application Support/app.bambupeek.desktop/printer.json`. It is outside the app bundle and source repository, and is never included in releases. No Keychain password prompt is needed.
 
-Only size and pin preferences are kept in local webview storage. The access code is cleared from the form after connection and is never returned from the secure store to the interface. Choose **Forget** in settings to remove the saved credential. Quitting clears the active in-memory connection; uninstalling the app alone may leave its saved credential. [Read the storage and network details](docs/privacy.md).
+The file is not encrypted by BambuPeek. On macOS its permissions allow only the current OS user to read and write it; the app folder is also restricted to that user. Other software running as the same user, administrators, and device backups may still access it. Use a session-only connection if you do not want the code stored on disk.
+
+Only size and pin preferences are kept in local webview storage. The access code is cleared from the form after connection and is never returned from saved settings to the interface. Choose **Forget** in settings to delete the profile. Quitting clears the active in-memory connection; uninstalling the app alone may leave its local settings. [Read the storage and network details](docs/privacy.md).
 
 ## Development and support
 

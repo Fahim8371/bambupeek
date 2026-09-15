@@ -12,3 +12,5 @@ src-tauri/gen/
 private/
 captures/
 work/
+printer.json
+printer.json.*

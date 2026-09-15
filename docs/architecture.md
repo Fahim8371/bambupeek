@@ -1,6 +1,6 @@
 # Architecture
 
-BambuPeek uses Tauri 2 for a native window and IPC, Rust for printer connections and secure storage, and TypeScript with the system webview for video and controls. No localhost media server or cloud relay is involved.
+BambuPeek uses Tauri 2 for a native window and IPC, Rust for printer connections and local storage, and TypeScript with the system webview for video and controls. No localhost media server or cloud relay is involved.
 
 ```mermaid
 flowchart LR
@@ -8,7 +8,7 @@ flowchart LR
   FFmpeg -->|fragmented MP4 via stdout| Rust
   Rust -->|bounded Tauri channel| Webview[MediaSource video]
   MQTT[Printer status] -->|MQTT / TLS| Rust
-  Keychain[OS credential store] <--> Rust
+  Profile[Local printer.json] <--> Rust
   Webview -->|window controls / IPC| Rust
 ```
 
@@ -22,7 +22,7 @@ flowchart LR
 | `camera.rs` | FFmpeg process, stdin manifest, fMP4 output, codec extraction and safe errors |
 | `status.rs` | TLS MQTT connection, selected status fields, partial report merging and retries |
 | `discovery.rs` | Local UDP discovery and validated printer metadata |
-| `storage.rs` | Versioned profile in native credential store; sanitized public metadata |
+| `storage.rs` | Versioned local profile, atomic writes and private file permissions; sanitized public metadata |
 
 ## Playback
 
@@ -36,9 +36,9 @@ MQTT uses a separate task. It subscribes to the device report topic before reque
 
 ## Persistence
 
-A versioned JSON representation is stored *inside* the native credential store, never on disk as a config file. Native operations run on blocking worker threads and are serialized. Public metadata has a separate type containing only IP and serial; loading a profile seeds Rust’s connection memory without returning its access code over IPC.
+A versioned JSON profile is stored in the OS user’s Tauri app configuration directory, outside the app bundle and source tree. File operations run on blocking worker threads and are serialized. On macOS, the directory is mode 0700 and the file mode 0600. A uniquely created temporary file is flushed and atomically persisted over the destination. Failed writes retain the previous profile, and temporary files are cleaned up. The file is not encrypted; there is no Keychain dependency or password prompt.
 
-The app remembers one printer. A new profile is saved only after successful frame presentation, or via an explicit save of the live session. A session ID check prevents a stale frontend save request from selecting a different session’s credentials. The frontend serializes save/forget interactions. Unsupported credential backends fail explicitly instead of silently using an in-memory mock.
+Public metadata has a separate type containing only IP and serial. Loading seeds Rust’s connection memory without returning its access code over IPC. The app remembers one printer, saved only after successful frame presentation or an explicit save of the live session. A session ID check prevents a stale save request from selecting a different session’s credentials. The frontend serializes save/forget interactions.
 
 ## Scope
 

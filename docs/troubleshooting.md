@@ -28,9 +28,9 @@ If macOS cannot decode the stream, update macOS. Playback needs H.264 MediaSourc
 
 ## Printer does not stay saved
 
-A profile is saved only after a video frame appears with Save selected, or after choosing **Save the connected printer on this device**. Check for a save error. Unlock the OS credential store or allow expected access to BambuPeek if prompted. This preview may prompt again after updates because it lacks a stable Developer ID signature.
+A profile is saved only after a video frame appears with Save selected, or after choosing **Save the connected printer on this device**. Check for a save error. Check that your user account can write to the app’s configuration folder and that the device has free disk space. The local-file version does not use Keychain or request a login password.
 
-If the saved profile is invalid, choose **Forget**, reconnect, and save again. No credentials are written to plaintext as a workaround. Linux saving is unsupported and reports an error explicitly.
+If the saved profile is invalid, choose **Forget**, reconnect, and save again. The saved profile is an unencrypted local file with owner-only permissions on macOS. Keep it out of repositories and shared folders.
 
 ## Window controls disappeared
 
